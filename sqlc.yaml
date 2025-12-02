@@ -1,0 +1,32 @@
+version: "2"
+sql:
+- engine: "postgresql"
+  queries: "internal/domains/customers/queries"
+  schema: "migrations"
+  gen:
+    go:
+      package: "models"
+      out: "internal/domains/customers/models"
+      emit_json_tags: true
+      emit_interface: true
+
+- engine: "postgresql"
+  queries: "internal/domains/campaigns/queries"
+  schema: "migrations"
+  gen:
+    go:
+      package: "models"
+      out: "internal/domains/campaigns/models"
+      emit_json_tags: true
+      emit_interface: true
+
+
+- engine: "postgresql"
+  queries: "internal/domains/messages/queries"
+  schema: "migrations"
+  gen:
+    go:
+      package: "models"
+      out: "internal/domains/messages/models"
+      emit_json_tags: true
+      emit_interface: true
