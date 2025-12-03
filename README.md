@@ -28,6 +28,18 @@ The service consists of three main components:
 - Go 1.21+
 - Make
 
+### Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/sangkips/campaign-dispatch-service.git
+   ```
+
+2. **Navigate to the project directory**:
+   ```bash
+   cd campaign-dispatch-service
+   ```
+
 ### Running the Service
 
 1. **Start all services** (API, Worker, Database, RabbitMQ):
@@ -123,7 +135,16 @@ The service uses a mock sender to simulate message delivery without actual exter
 - **Logging**: Logs all send attempts with customer phone and message content
 
 I have included a script to test the mock sender in `demo_retry_failures.sh`.
-Run the script with `./demo_retry_failures.sh`. Make sure to have correct permissions to run the script. `chmod +x demo_retry_failures.sh`.
+Run the script with:
+
+```bash
+./demo_retry_failures.sh
+```
+Make sure to have correct permissions to run the script.
+
+```bash
+chmod +x demo_retry_failures.sh
+```
 
 ### Rationale
 
@@ -154,13 +175,13 @@ If you are using Postman, you can use a Pre-request Script to automatically calc
 - Open your POST /campaigns request.
 - Go to the Pre-request Script tab.
 - Add this code:
-```
+```bash
 var date = new Date();
 date.setMinutes(date.getMinutes() + 3); // Add 3 minutes
 pm.environment.set("scheduled_at", date.toISOString());
 ```
 - In the Body tab, use the variable to scheduled a campaign:
-```
+```bash
 {
   "name": "Postman Scheduled Test",
   "channel": "sms",
@@ -172,7 +193,7 @@ pm.environment.set("scheduled_at", date.toISOString());
 
 ##### Step 2: Add Recipients (Queue Messages)
 Call the send endpoint. Since the campaign is scheduled for the future, this will only queue the messages and NOT send them immediately.
-```
+```bash
 curl -X POST http://localhost:8080/campaigns/10/send \
   -H "Content-Type: application/json" \
   -d '{
@@ -181,7 +202,7 @@ curl -X POST http://localhost:8080/campaigns/10/send \
   ```
 
 Expected Response:
-```
+```bash
 {
   "campaign_id": 10,
   "messages_queued": 3,
@@ -190,14 +211,15 @@ Expected Response:
 ```
 ##### Step 3: Verify Database State (Before Schedule)
 Check that messages are pending and campaign is scheduled.
-```
+```bash
 docker compose exec db psql -U user -d campaign_db -c "SELECT id, status FROM campaigns WHERE id = 10;"
 docker compose exec db psql -U user -d campaign_db -c "SELECT id, status FROM outbound_messages WHERE campaign_id = 10;"
 
 ```
 ##### Step 4: Verify Database State (After Schedule)
 Check that campaign status is sending (or sent if worker processed them) and messages are processed.
-```
+
+```bash
 docker compose exec db psql -U user -d campaign_db -c "SELECT id, status FROM campaigns WHERE id = 10;"
 docker compose exec db psql -U user -d campaign_db -c "SELECT id, status FROM outbound_messages WHERE campaign_id = 10;"
 ```
@@ -207,13 +229,14 @@ Use this endpoint `POST /campaigns/{id}/personalized-preview`
 
 ##### Step 1: Basic Preview with Campaign Template
 Request:
-```
+
+```bash
 curl -X POST http://localhost:8080/campaigns/14/personalized-preview \
   -H "Content-Type: application/json" \
   -d '{"customer_id": 3}'
   ```
 Response:
-```
+```bash
 {
   "rendered_message": "Hello Alice!",
   "used_template": "Hello {first_name}!",
@@ -229,7 +252,8 @@ Response:
 ```
 ###### Step 2: Preview with Override Template
 Request:
-```
+
+```bash
 curl -X POST http://localhost:8080/campaigns/14/personalized-preview \
   -H "Content-Type: application/json" \
   -d '{
@@ -238,7 +262,8 @@ curl -X POST http://localhost:8080/campaigns/14/personalized-preview \
   }'
 ```
 Response:
-```
+
+```bash
 {
   "rendered_message": "Hi Alice, special offer just for you in Nairobi!",
   "used_template": "Hi {first_name}, special offer just for you in {location}!",
@@ -256,12 +281,14 @@ Response:
 ### List Campaigns
 
 ##### 1. List All Campaigns (Page 1, Size 10)
-```
+
+```bash
 curl -s "http://localhost:8080/campaigns?page=1&page_size=10"
 
 ```
 Result:
-```
+
+```bash
 {
   "data": [
     { "id": 12, "name": "Campaign 3", "channel": "sms", ... },
@@ -278,11 +305,13 @@ Result:
 ```
 
 ##### 2. Filter by Channel (SMS)
-```
+
+``` bash
 curl -s "http://localhost:8080/campaigns?channel=sms"
 ```
 Result:
-```
+
+```bash
 
 {
   "data": [
@@ -300,11 +329,13 @@ Result:
 ```
 
 ##### 3. Pagination (Page 2, Size 5)
-```
+
+```bash
 curl -s "http://localhost:8080/campaigns?page=2&page_size=5"
 ```
 Result:
-```
+
+```bash
 {
   "data": [
     { "id": 7, "name": "Campaign 1", ... },
