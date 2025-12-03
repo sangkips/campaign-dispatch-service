@@ -9,6 +9,7 @@ import (
 type Repository interface {
 	CreateCustomer(ctx context.Context, customer models.CreateCustomerParams) (models.Customer, error)
 	GetCustomerForPreview(ctx context.Context, id int32) (models.GetCustomerForPreviewRow, error)
+	ListCustomers(ctx context.Context, params models.ListCustomersParams) ([]models.Customer, error)
 }
 
 type repository struct {
@@ -25,4 +26,8 @@ func (r *repository) CreateCustomer(ctx context.Context, customer models.CreateC
 
 func (r *repository) GetCustomerForPreview(ctx context.Context, id int32) (models.GetCustomerForPreviewRow, error) {
 	return r.q.GetCustomerForPreview(ctx, id)
+}
+
+func (r *repository) ListCustomers(ctx context.Context, params models.ListCustomersParams) ([]models.Customer, error) {
+	return r.q.ListCustomers(ctx, params)
 }

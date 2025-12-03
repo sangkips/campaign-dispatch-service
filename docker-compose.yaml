@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -33,7 +33,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -54,7 +54,7 @@ services:
 
   worker:
     build: .
-    command: ["./worker"]
+    command: [ "./worker" ]
     depends_on:
       db:
         condition: service_healthy
@@ -63,6 +63,17 @@ services:
     environment:
       DB_URL: ${DB_URL_DOCKER}
       RABBITMQ_URL: ${RABBITMQ_URL_DOCKER}
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:${PORT}
+    depends_on:
+      - app
 
 volumes:
   postgres_data:

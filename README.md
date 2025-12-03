@@ -27,6 +27,7 @@ The service consists of three main components:
 - Docker and Docker Compose
 - Go 1.21+
 - Make
+- Node.js 20+
 
 ### Installation
 

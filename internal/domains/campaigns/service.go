@@ -141,9 +141,21 @@ type Pagination struct {
 	TotalPages int32 `json:"total_pages"`
 }
 
+// CampaignWithStats includes campaign data and message statistics
+type CampaignWithStats struct {
+	ID           int32         `json:"id"`
+	Name         string        `json:"name"`
+	Channel      string        `json:"channel"`
+	Status       string        `json:"status"`
+	BaseTemplate string        `json:"base_template"`
+	ScheduledAt  *time.Time    `json:"scheduled_at"`
+	CreatedAt    time.Time     `json:"created_at"`
+	Stats        CampaignStats `json:"stats"`
+}
+
 type ListCampaignsResponse struct {
-	Data       []models.Campaign `json:"data"`
-	Pagination Pagination        `json:"pagination"`
+	Data       []CampaignWithStats `json:"data"`
+	Pagination Pagination          `json:"pagination"`
 }
 
 func stringToNullString(s string) sql.NullString {
@@ -192,13 +204,40 @@ func (s *Service) ListCampaigns(ctx context.Context, params ListCampaignsParams)
 		totalPages = int32((totalCount + int64(params.PageSize) - 1) / int64(params.PageSize))
 	}
 
-	// Ensure empty slice instead of nil for JSON marshaling
-	if campaigns == nil {
-		campaigns = []models.Campaign{}
+	// Fetch stats for each campaign and build response
+	campaignsWithStats := make([]CampaignWithStats, 0, len(campaigns))
+	for _, campaign := range campaigns {
+		stats, err := s.repo.GetCampaignStats(ctx, campaign.ID)
+		if err != nil {
+			// If stats fetch fails, use zero values
+			stats = models.GetCampaignStatsRow{}
+		}
+
+		var scheduledAt *time.Time
+		if campaign.ScheduledAt.Valid {
+			scheduledAt = &campaign.ScheduledAt.Time
+		}
+
+		campaignsWithStats = append(campaignsWithStats, CampaignWithStats{
+			ID:           campaign.ID,
+			Name:         campaign.Name,
+			Channel:      campaign.Channel,
+			Status:       campaign.Status,
+			BaseTemplate: campaign.BaseTemplate,
+			ScheduledAt:  scheduledAt,
+			CreatedAt:    campaign.CreatedAt,
+			Stats: CampaignStats{
+				Total:   stats.Total,
+				Pending: stats.Pending,
+				Sending: stats.Sending,
+				Sent:    stats.Sent,
+				Failed:  stats.Failed,
+			},
+		})
 	}
 
 	return &ListCampaignsResponse{
-		Data: campaigns,
+		Data: campaignsWithStats,
 		Pagination: Pagination{
 			Page:       params.Page,
 			PageSize:   params.PageSize,
