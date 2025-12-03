@@ -47,13 +47,17 @@ The service consists of three main components:
    ```bash
    make build
    ```
+2. **Access frontend**:
+   ```bash
+   http://localhost:3001
+   ```
 
-2. **View logs**:
+3. **View logs**:
    ```bash
    make logs
    ```
 
-3. **Stop services**:
+4. **Stop services**:
    ```bash
    make down
    ```
