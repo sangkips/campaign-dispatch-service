@@ -55,7 +55,7 @@ CREATE TRIGGER update_outbound_messages_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_outbound_messages_updated_at();
 
--- Optional: Create a table for campaign send jobs/queue if you want to persist queue jobs
+-- Create a table for campaign send jobs/queue to persist queue jobs
 CREATE TABLE IF NOT EXISTS campaign_send_jobs (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     outbound_message_id INTEGER NOT NULL,

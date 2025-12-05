@@ -77,6 +77,13 @@ The service consists of three main components:
    ```
 
 3. **Load seed data** (optional - creates 10 customers and 3 campaigns):
+
+Make sure to have correct permissions to run the script.
+
+```bash
+chmod +x seed.sh
+```
+
    ```bash
    ./seed.sh
    ```

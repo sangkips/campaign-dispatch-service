@@ -67,7 +67,7 @@ func main() {
 	campaignRepo := campaigns.NewRepository(db)
 	messagesRepo := messages.NewRepository(db)
 
-	// Start Scheduler
+	// Start Scheduler(initializes a schedular that runs every 10 seconds in a separate goroutine)
 	scheduler := worker.NewScheduler(campaignRepo, messagesRepo, rabbitMQ, 10*time.Second)
 	go scheduler.Start()
 	defer scheduler.Stop()
