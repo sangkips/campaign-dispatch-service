@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Seed database with sample data
-# This script loads 10 customers and 3 campaigns for testing
+# This script loads 100 customers and 3 campaigns for testing
 
 set -e
 
@@ -20,7 +20,7 @@ docker compose exec -T db psql -U user -d campaign_db < migrations/004_seed_data
 echo "✅ Seed data loaded successfully!"
 echo ""
 echo "📊 Summary:"
-echo "   - 10 customers created"
+echo "   - 100 customers created"
 echo "   - 3 campaigns created (2 draft, 1 scheduled)"
 echo ""
 echo "🔍 Verify with:"
