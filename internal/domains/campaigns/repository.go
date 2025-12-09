@@ -13,6 +13,7 @@ type Repository interface {
 	ListCampaigns(ctx context.Context, params models.ListCampaignsParams) ([]models.Campaign, error)
 	CountCampaigns(ctx context.Context, params models.CountCampaignsParams) (int64, error)
 	GetCampaignStats(ctx context.Context, id int32) (models.GetCampaignStatsRow, error)
+	GetCampaignStatsBatch(ctx context.Context, campaignIDs []int32) ([]models.GetCampaignStatsBatchRow, error)
 	GetCampaignsReadyToSend(ctx context.Context) ([]models.GetCampaignsReadyToSendRow, error)
 }
 
@@ -46,6 +47,10 @@ func (r *repository) CountCampaigns(ctx context.Context, params models.CountCamp
 
 func (r *repository) GetCampaignStats(ctx context.Context, id int32) (models.GetCampaignStatsRow, error) {
 	return r.q.GetCampaignStats(ctx, id)
+}
+
+func (r *repository) GetCampaignStatsBatch(ctx context.Context, campaignIDs []int32) ([]models.GetCampaignStatsBatchRow, error) {
+	return r.q.GetCampaignStatsBatch(ctx, campaignIDs)
 }
 
 func (r *repository) GetCampaignsReadyToSend(ctx context.Context) ([]models.GetCampaignsReadyToSendRow, error) {

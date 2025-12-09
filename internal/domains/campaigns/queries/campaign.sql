@@ -58,6 +58,19 @@ SELECT
 FROM outbound_messages
 WHERE campaign_id = @campaign_id;
 
+-- name: GetCampaignStatsBatch :many
+SELECT
+    campaign_id,
+    COUNT(*) as total,
+    COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
+    COUNT(CASE WHEN status = 'sending' THEN 1 END) as sending,
+    COUNT(CASE WHEN status = 'sent' THEN 1 END) as sent,
+    COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed
+FROM outbound_messages
+WHERE campaign_id = ANY(sqlc.arg('campaign_ids')::int[])
+GROUP BY campaign_id;
+
+
 -- name: GetCampaignsReadyToSend :many
 -- name: GetCampaignsReadyToSend :many
 UPDATE campaigns

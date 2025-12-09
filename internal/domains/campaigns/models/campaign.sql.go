@@ -8,6 +8,8 @@ package models
 import (
 	"context"
 	"database/sql"
+
+	"github.com/lib/pq"
 )
 
 const countCampaigns = `-- name: CountCampaigns :one
@@ -127,6 +129,58 @@ func (q *Queries) GetCampaignStats(ctx context.Context, campaignID int32) (GetCa
 		&i.Failed,
 	)
 	return i, err
+}
+
+const getCampaignStatsBatch = `-- name: GetCampaignStatsBatch :many
+SELECT
+    campaign_id,
+    COUNT(*) as total,
+    COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
+    COUNT(CASE WHEN status = 'sending' THEN 1 END) as sending,
+    COUNT(CASE WHEN status = 'sent' THEN 1 END) as sent,
+    COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed
+FROM outbound_messages
+WHERE campaign_id = ANY($1::int[])
+GROUP BY campaign_id
+`
+
+type GetCampaignStatsBatchRow struct {
+	CampaignID int32 `json:"campaign_id"`
+	Total      int64 `json:"total"`
+	Pending    int64 `json:"pending"`
+	Sending    int64 `json:"sending"`
+	Sent       int64 `json:"sent"`
+	Failed     int64 `json:"failed"`
+}
+
+func (q *Queries) GetCampaignStatsBatch(ctx context.Context, campaignIds []int32) ([]GetCampaignStatsBatchRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCampaignStatsBatch, pq.Array(campaignIds))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetCampaignStatsBatchRow
+	for rows.Next() {
+		var i GetCampaignStatsBatchRow
+		if err := rows.Scan(
+			&i.CampaignID,
+			&i.Total,
+			&i.Pending,
+			&i.Sending,
+			&i.Sent,
+			&i.Failed,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getCampaignsReadyToSend = `-- name: GetCampaignsReadyToSend :many

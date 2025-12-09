@@ -41,6 +41,10 @@ func (m *mockCampaignRepo) GetCampaignStats(ctx context.Context, id int32) (mode
 	return models.GetCampaignStatsRow{}, errors.New("not implemented")
 }
 
+func (m *mockCampaignRepo) GetCampaignStatsBatch(ctx context.Context, campaignIDs []int32) ([]models.GetCampaignStatsBatchRow, error) {
+	return nil, errors.New("not implemented")
+}
+
 func (m *mockCampaignRepo) GetCampaignsReadyToSend(ctx context.Context) ([]models.GetCampaignsReadyToSendRow, error) {
 	return nil, nil
 }

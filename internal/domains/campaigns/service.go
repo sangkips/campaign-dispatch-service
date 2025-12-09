@@ -204,14 +204,29 @@ func (s *Service) ListCampaigns(ctx context.Context, params ListCampaignsParams)
 		totalPages = int32((totalCount + int64(params.PageSize) - 1) / int64(params.PageSize))
 	}
 
-	// Fetch stats for each campaign and build response
+	// Extract campaign IDs for batch stats fetch
+	campaignIDs := make([]int32, len(campaigns))
+	for i, campaign := range campaigns {
+		campaignIDs[i] = campaign.ID
+	}
+
+	// Fetch all stats in one query (eliminates N+1 problem)
+	statsList, err := s.repo.GetCampaignStatsBatch(ctx, campaignIDs)
+	if err != nil {
+		// If batch stats fetch fails, we'll use zero values for all
+		statsList = []models.GetCampaignStatsBatchRow{}
+	}
+
+	// Build a map for O(1) lookup
+	statsMap := make(map[int32]models.GetCampaignStatsBatchRow)
+	for _, stat := range statsList {
+		statsMap[stat.CampaignID] = stat
+	}
+
+	// Build response with stats lookup
 	campaignsWithStats := make([]CampaignWithStats, 0, len(campaigns))
 	for _, campaign := range campaigns {
-		stats, err := s.repo.GetCampaignStats(ctx, campaign.ID)
-		if err != nil {
-			// If stats fetch fails, use zero values
-			stats = models.GetCampaignStatsRow{}
-		}
+		stats := statsMap[campaign.ID] // O(1) lookup, zero value if not found
 
 		var scheduledAt *time.Time
 		if campaign.ScheduledAt.Valid {

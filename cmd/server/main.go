@@ -19,11 +19,13 @@ import (
 )
 
 func main() {
+	// Load configuration
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to load config")
 	}
 
+	// Connect to database
 	db, err := db.ConnectAndMigrate(cfg.DBURL)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to connect to database")
@@ -37,6 +39,7 @@ func main() {
 	}
 	defer rabbitMQ.Close()
 
+	// Initialize chi router
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
@@ -50,6 +53,7 @@ func main() {
 		MaxAge:           300,
 	}))
 
+	// Initialize handlers
 	customerHandler := customers.NewHandler(db)
 	r.Route("/customers", func(r chi.Router) {
 		customerHandler.RegisterCustomerRoutes(r)

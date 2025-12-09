@@ -14,6 +14,7 @@ type Querier interface {
 	CreateCampaign(ctx context.Context, arg CreateCampaignParams) (Campaign, error)
 	GetCampaign(ctx context.Context, id int32) (Campaign, error)
 	GetCampaignStats(ctx context.Context, campaignID int32) (GetCampaignStatsRow, error)
+	GetCampaignStatsBatch(ctx context.Context, campaignIds []int32) ([]GetCampaignStatsBatchRow, error)
 	GetCampaignsReadyToSend(ctx context.Context) ([]GetCampaignsReadyToSendRow, error)
 	ListCampaigns(ctx context.Context, arg ListCampaignsParams) ([]Campaign, error)
 	UpdateCampaignStatus(ctx context.Context, arg UpdateCampaignStatusParams) (Campaign, error)

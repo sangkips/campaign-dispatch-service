@@ -111,7 +111,7 @@ func (w *Worker) handleSuccess(ctx context.Context, d amqp091.Delivery, details 
 
 	if err != nil {
 		log.Error().Err(err).Int32("outbound_message_id", details.ID).Msg("failed to update status to sent")
-		// If we sent it but failed to update DB, we might resend duplicate.
+		// If we send it but failed to update DB, we might resend duplicate.
 		// Ideally we should have idempotency key on provider side.
 		// For now, we ack because we did the job.
 		d.Ack(false)
